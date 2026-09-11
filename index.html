@@ -3,88 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seventeens Agricultural Products Trading - Menu</title>
+    <title>Seventeens Agricultural Products Trading - System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { border-bottom: 3px solid #2563eb; color: #1d4ed8; font-weight: bold; }
         .menu-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
             border-color: #16a34a;
         }
+        table { border-collapse: collapse; width: 100%; white-space: nowrap; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px 12px; font-size: 14px; }
+        th { background-color: #f8fafc; color: #334155; font-weight: 600; text-align: center; }
+        tr:hover { background-color: #f1f5f9; }
+        .num { text-align: right; font-family: monospace; font-size: 14px; }
+        .date-col { text-align: center; }
+        .net-positive { color: #16a34a; font-weight: bold; }
+        .net-negative { color: #dc2626; font-weight: bold; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-between p-6 font-sans">
-    
-    <!-- Top Status Bar (Network Strength & Battery) -->
-    <div class="w-full max-w-3xl flex flex-wrap justify-end items-center gap-2 text-xs font-semibold mb-2">
-        <!-- Signal / Network Strength Badge -->
-        <div id="net-status" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm transition-all">
-            <span id="net-dot" class="w-2 h-2 rounded-full bg-green-600 animate-pulse"></span>
-            <span id="net-text">Checking Signal...</span>
-        </div>
-        <!-- Battery Status Badge -->
-        <div id="battery-status" class="hidden items-center gap-1.5 px-3 py-1 rounded-full bg-white text-gray-700 shadow-sm border border-gray-200">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-            <span id="battery-text">Battery: --%</span>
-        </div>
-    </div>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-between p-4 md:p-6 font-sans">
 
-    <!-- WARNING BANNER FOR OFFLINE OR WEAK SIGNAL -->
-    <div id="warning-banner" class="hidden w-full max-w-3xl mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm">
-        <div class="flex items-center">
-            <div class="flex-shrink-0 text-amber-500" id="warn-icon">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm font-bold text-amber-900" id="warn-title">HINAY ANG INTERNET</p>
-                <p class="text-xs text-amber-700" id="warn-desc">Siguraduha nga lig-on ang signal usa ka mag-save sa data aron dili ma-interrupt.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Container -->
-    <div class="max-w-3xl w-full text-center my-auto">
-        
-        <!-- Logo and Header -->
-        <div class="mb-10 flex flex-col items-center">
-            <img src="17.png" alt="Seventeens Agricultural Products Trading Logo" class="w-48 h-48 md:w-56 md:h-56 object-contain mb-6 drop-shadow-lg">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight mb-2">Seventeens</h1>
-            <h2 class="text-lg md:text-xl font-semibold text-gray-600 uppercase tracking-widest px-4">Agricultural Products Trading</h2>
-            <p class="text-sm text-gray-500 mt-2">Sales & Inventory Management System</p>
-        </div>
-
-        <!-- Menu Options -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+    <!-- 1. LOGIN / PIN LOCK SCREEN -->
+    <div id="lock-screen" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-50 flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full p-8 rounded-2xl shadow-2xl text-center">
+            <img src="17.png" alt="Logo" class="w-24 h-24 mx-auto object-contain mb-4 drop-shadow">
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">Seventeens Trading</h2>
+            <p class="text-sm text-gray-500 mb-6">Palihug isulod ang Access PIN para makasulod.</p>
             
-            <!-- Entry Link -->
-            <a href="entry.html" class="menu-card bg-white p-6 md:p-8 rounded-2xl shadow-sm border-2 border-transparent transition-all duration-300 flex flex-col items-center group text-decoration-none">
-                <div class="bg-blue-100 text-blue-600 p-4 rounded-full mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                </div>
-                <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Data Entry</h3>
-                <p class="text-gray-500 text-sm">Add new Coal and Corn sales records to the database.</p>
-            </a>
-
-            <!-- View Link -->
-            <a href="view.html" class="menu-card bg-white p-6 md:p-8 rounded-2xl shadow-sm border-2 border-transparent transition-all duration-300 flex flex-col items-center group text-decoration-none">
-                <div class="bg-green-100 text-green-600 p-4 rounded-full mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                    <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                </div>
-                <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Data Viewer</h3>
-                <p class="text-gray-500 text-sm">View summary and Excel-like reports of all transactions.</p>
-            </a>
-
+            <form onsubmit="verifyPin(event)" class="space-y-4">
+                <input type="password" id="pin-input" placeholder="Isulod ang PIN (e.g. *#17)" class="border-2 border-gray-300 focus:border-green-600 focus:outline-none p-3 w-full rounded-xl text-center text-xl tracking-widest font-bold" required autocomplete="current-password">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-colors shadow-md">
+                    Unlock System
+                </button>
+            </form>
+            <p id="pin-error" class="text-red-500 text-xs mt-3 hidden font-medium">Sayop ang PIN. Palihug sulayi og usab.</p>
         </div>
-
     </div>
 
-    <!-- Footer -->
-    <div class="mt-12 text-gray-400 text-xs md:text-sm text-center">
-        &copy; 2026 Seventeens Agricultural Products Trading. All rights reserved.
+    <!-- MAIN APP CONTAINER (Hidden until unlocked) -->
+    <div id="main-app" class="hidden flex flex-col min-h-screen justify-between">
+        
+        <div>
+            <!-- Top Status Bar (Network Strength & Battery) -->
+            <div class="w-full max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2 text-xs font-semibold mb-4 pb-2 border-b border-gray-200">
+                <button onclick="logout()" class="text-red-600 hover:underline flex items-center gap-1 font-bold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Lock System (Log out)
+                </button>
+                <div class="flex items-center gap-2">
+                    <div id="net-status" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm transition-all">
+                        <span id="net-dot" class="w-2 h-2 rounded-full bg-green-600 animate-pulse"></span>
+                        <span id="net-text">Checking Signal...</span>
+                    </div>
+                    <div id="battery-status" class="hidden items-center gap-1.5 px-3 py-1 rounded-full bg-white text-gray-700 shadow-sm border border-gray-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        <span id="battery-text">Battery: --%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WARNING BANNER FOR OFFLINE OR WEAK SIGNAL -->
+            <div id="warning-banner" class="hidden w-full max-w-7xl mx-auto mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 text-amber-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-bold text-amber-900" id="warn-title">HINAY ANG INTERNET</p>
+                        <p class="text-xs text-amber-700" id="warn-desc">Siguraduha nga lig-on ang signal usa ka mag-save sa data.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 1: MAIN MENU -->
+            <div id="view-menu" class="max-w-3xl w-full mx-auto text-center my-12">
+                <div class="mb-8 flex flex-col items-center">
+                    <img src="17.png" alt="Logo" class="w-40 h-40 object-contain mb-4 drop-shadow-lg">
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight mb-2">Seventeens</h1>
+                    <h2 class="text-lg md:text-xl font-semibold text-gray-600 uppercase tracking-widest px-4">Agricultural Products Trading</h2>
+                    <p class="text-sm text-gray-500 mt-2">Sales & Inventory Management System</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                    <button onclick="navigateTo('entry')" class="menu-card bg-white p-6 md:p-8 rounded-2xl shadow-sm border-2 border-transparent transition-all duration-300 flex flex-col items-center group">
+                        <div class="bg-blue-100 text-blue-600 p-4 rounded-full mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Data Entry</h3>
+                        <p class="text-gray-500 text-sm">Add new Coal and Corn sales records.</p>
+                    </button>
+
+                    <button onclick="navigateTo('viewer')" class="menu-card bg-white p-6 md:p-8 rounded-2xl shadow-sm border-2 border-transparent transition-all duration-300 flex flex-col items-center group">
+                        <div class="bg-green-100 text-green-600 p-4 rounded-full mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                            <svg class="w-8 h-8 md:w-10 md:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">Data Viewer</h3>
+                        <p class="text-gray-500 text-sm">View summary and transaction reports.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW 2: DATA ENTRY -->
+            <div id="view-entry" class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow hidden">
+                <button onclick="navigateTo('menu')" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 mb-6 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Main Menu
+                </button>
+
+                <h1 class="text-2xl font-bold mb-6 text-gray-800">17 Sales Records - Data Entry</h1>
+                
+                <div class="flex border-b mb-6">
+                    <button onclick="switchFormTab('coal')" id="form-tab-coal" class="tab-btn active px-4 py-2 font-semibold text-gray-600 focus:outline-none">Coal Entry</button>
+                    <button onclick="switchFormTab('corn')" id="form-tab-corn" class="tab-btn px-4 py-2 font-semibold text-gray-600 focus:outline-none">Corn Entry</button>
+                </div>
+
+                <!-- COAL FORM -->
+                <div id="form-coal" class="tab-content active">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">COAL Details</h2>
+                    <form onsubmit="submitCoal(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm">Date</label><input type="date" id="c_date" class="border p-2 w-full rounded" required></div>
+                            <div><label class="block text-sm">Weight (kg)</label><input type="number" id="c_weight" class="border p-2 w-full rounded c_input" required></div>
+                        </div>
+                        <h3 class="font-semibold text-gray-600 mt-4 border-b pb-1">Buy & Sell (Per Kilo)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm">Buy (per kilo)</label><input type="number" step="0.01" id="c_buy_pk" class="border p-2 w-full rounded c_input" required></div>
+                            <div><label class="block text-sm">Sell (per kilo)</label><input type="number" step="0.01" id="c_sell_pk" class="border p-2 w-full rounded c_input" required></div>
+                        </div>
+                        <h3 class="font-semibold text-gray-600 mt-4 border-b pb-1">Expenses (Per Kilo)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><label class="block text-sm">Trucking</label><input type="number" step="0.01" id="c_trk_pk" class="border p-2 w-full rounded c_input" value="1.2"></div>
+                            <div><label class="block text-sm">Documents</label><input type="number" step="0.01" id="c_doc_pk" class="border p-2 w-full rounded c_input" value="0.5"></div>
+                            <div><label class="block text-sm">Purchaser 1</label><input type="number" step="0.01" id="c_p1_pk" class="border p-2 w-full rounded c_input" value="0.5"></div>
+                        </div>
+                        <h3 class="font-semibold text-gray-600 mt-4 border-b pb-1">Expenses (Flat Total)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm">Purchaser 2 (Total)</label><input type="number" step="0.01" id="c_p2_tot" class="border p-2 w-full rounded c_input" value="15000"></div>
+                            <div><label class="block text-sm">Boiler (Total)</label><input type="number" step="0.01" id="c_blr_tot" class="border p-2 w-full rounded c_input" value="41000"></div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded mt-6">
+                            <h3 class="font-bold text-blue-800">Auto-Computed Totals</h3>
+                            <div class="grid grid-cols-2 gap-2 mt-2 text-sm text-blue-900">
+                                <div>Buy Total: <span id="c_buy_tot" class="font-bold">0.00</span></div>
+                                <div>Sell Total: <span id="c_sell_tot" class="font-bold">0.00</span></div>
+                                <div>Total Expenses: <span id="c_exp_tot" class="font-bold">0.00</span></div>
+                                <div class="text-lg">NET: <span id="c_net" class="font-bold text-green-600">0.00</span></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 w-full md:w-auto">Save Data to Coal Table</button>
+                    </form>
+                </div>
+
+                <!-- CORN FORM -->
+                <div id="form-corn" class="tab-content">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">CORN Details</h2>
+                    <form onsubmit="submitCorn(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm">Date</label><input type="date" id="cr_date" class="border p-2 w-full rounded" required></div>
+                            <div><label class="block text-sm">Weight (kg)</label><input type="number" id="cr_weight" class="border p-2 w-full rounded cr_input" required></div>
+                        </div>
+                        <h3 class="font-semibold text-gray-600 mt-4 border-b pb-1">Buy & Sell (Per Kilo)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm">Buy (per kilo)</label><input type="number" step="0.01" id="cr_buy_pk" class="border p-2 w-full rounded cr_input" required></div>
+                            <div><label class="block text-sm">Sell (per kilo)</label><input type="number" step="0.01" id="cr_sell_pk" class="border p-2 w-full rounded cr_input" required></div>
+                        </div>
+                        <h3 class="font-semibold text-gray-600 mt-4 border-b pb-1">Expenses (Per Kilo)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><label class="block text-sm">Trucking</label><input type="number" step="0.01" id="cr_trk_pk" class="border p-2 w-full rounded cr_input" value="1"></div>
+                            <div><label class="block text-sm">Documents</label><input type="number" step="0.01" id="cr_doc_pk" class="border p-2 w-full rounded cr_input" value="0.2"></div>
+                            <div><label class="block text-sm">Purchaser 1</label><input type="number" step="0.01" id="cr_p1_pk" class="border p-2 w-full rounded cr_input" value="0.3"></div>
+                            <div><label class="block text-sm">Purchaser 2</label><input type="number" step="0.01" id="cr_p2_pk" class="border p-2 w-full rounded cr_input" value="0.1"></div>
+                            <div><label class="block text-sm">Seventeen</label><input type="number" step="0.01" id="cr_sev_pk" class="border p-2 w-full rounded cr_input" value="0.4"></div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded mt-6">
+                            <h3 class="font-bold text-yellow-800">Auto-Computed Totals</h3>
+                            <div class="grid grid-cols-2 gap-2 mt-2 text-sm text-yellow-900">
+                                <div>Buy Total: <span id="cr_buy_tot" class="font-bold">0.00</span></div>
+                                <div>Sell Total: <span id="cr_sell_tot" class="font-bold">0.00</span></div>
+                                <div>Total Expenses: <span id="cr_exp_tot" class="font-bold">0.00</span></div>
+                                <div class="text-lg">NET: <span id="cr_net" class="font-bold text-green-600">0.00</span></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="mt-4 bg-yellow-600 text-white px-6 py-2 rounded hover:bg-yellow-700 w-full md:w-auto">Save Data to Corn Table</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- VIEW 3: DATA VIEWER -->
+            <div id="view-viewer" class="max-w-7xl mx-auto bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200 hidden">
+                <button onclick="navigateTo('menu')" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 mb-4 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Main Menu
+                </button>
+
+                <h1 class="text-xl md:text-2xl font-bold mb-1 text-gray-800">Sales Records - Viewer</h1>
+                <p class="text-xs md:text-sm text-gray-500 mb-4">Live data fetched directly from 17s Record Book</p>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-300 mb-6 gap-4">
+                    <div class="flex overflow-x-auto space-x-2">
+                        <button onclick="switchViewerTab('summary')" id="viewer-tab-summary" class="tab-btn active px-4 md:px-6 py-2 text-gray-600 focus:outline-none transition-colors whitespace-nowrap">Summary</button>
+                        <button onclick="switchViewerTab('coal')" id="viewer-tab-coal" class="tab-btn px-4 md:px-6 py-2 text-gray-600 focus:outline-none transition-colors whitespace-nowrap">Coal Data</button>
+                        <button onclick="switchViewerTab('corn')" id="viewer-tab-corn" class="tab-btn px-4 md:px-6 py-2 text-gray-600 focus:outline-none transition-colors whitespace-nowrap">Corn Data</button>
+                    </div>
+                    <div>
+                        <button onclick="fetchAllData()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Refresh Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SUMMARY -->
+                <div id="viewer-summary" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
+                        <div class="bg-blue-50 border border-blue-200 p-5 rounded-lg text-center shadow-sm">
+                            <h3 class="text-blue-800 font-semibold mb-1 text-sm md:text-base">Total COAL Net</h3>
+                            <p class="text-2xl md:text-3xl font-bold text-blue-900 break-words" id="sum-coal">₱ 0.00</p>
+                        </div>
+                        <div class="bg-yellow-50 border border-yellow-200 p-5 rounded-lg text-center shadow-sm">
+                            <h3 class="text-yellow-800 font-semibold mb-1 text-sm md:text-base">Total CORN Net</h3>
+                            <p class="text-2xl md:text-3xl font-bold text-yellow-900 break-words" id="sum-corn">₱ 0.00</p>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 p-5 rounded-lg text-center shadow-inner">
+                            <h3 class="text-green-800 font-bold mb-1 text-sm md:text-base">GRAND TOTAL NET</h3>
+                            <p class="text-3xl md:text-4xl font-black text-green-700 break-words" id="sum-grand">₱ 0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COAL TABLE -->
+                <div id="viewer-coal" class="tab-content overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Date</th>
+                                <th rowspan="2">Weight (kg)</th>
+                                <th colspan="2" class="bg-blue-50">Buy</th>
+                                <th colspan="2" class="bg-blue-50">Sell</th>
+                                <th rowspan="2">Total Expenses</th>
+                                <th rowspan="2" class="bg-green-50">NET</th>
+                            </tr>
+                            <tr>
+                                <th class="bg-blue-50">Per Kilo</th>
+                                <th class="bg-blue-50">Total</th>
+                                <th class="bg-blue-50">Per Kilo</th>
+                                <th class="bg-blue-50">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coal-body">
+                            <tr><td colspan="8" class="text-center text-gray-500 py-4">Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- CORN TABLE -->
+                <div id="viewer-corn" class="tab-content overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Date</th>
+                                <th rowspan="2">Weight (kg)</th>
+                                <th colspan="2" class="bg-yellow-50">Buy</th>
+                                <th colspan="2" class="bg-yellow-50">Sell</th>
+                                <th rowspan="2">Total Expenses</th>
+                                <th rowspan="2" class="bg-green-50">NET</th>
+                            </tr>
+                            <tr>
+                                <th class="bg-yellow-50">Per Kilo</th>
+                                <th class="bg-yellow-50">Total</th>
+                                <th class="bg-yellow-50">Per Kilo</th>
+                                <th class="bg-yellow-50">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corn-body">
+                            <tr><td colspan="8" class="text-center text-gray-500 py-4">Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-12 text-gray-400 text-xs md:text-sm text-center">
+            &copy; 2026 Seventeens Agricultural Products Trading. All rights reserved.
+        </div>
     </div>
 
     <script>
-        // --- ADVANCED NETWORK & STRENGTH MONITORING ---
+        const SUPABASE_URL = 'https://iilfklquzyxmdergwawh.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_xO3twPzyDBLhdltnkwoS3w_xswYLyf_';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- PIN VERIFICATION SYSTEM ---
+        async function verifyPin(event) {
+            event.preventDefault();
+            const inputPin = document.getElementById('pin-input').value.trim();
+            const errorText = document.getElementById('pin-error');
+
+            try {
+                // Query allowed_pins table from Supabase
+                const { data, error } = await supabaseClient
+                    .from('allowed_pins')
+                    .select('pin_code')
+                    .eq('pin_code', inputPin);
+
+                if (error) {
+                    console.error("PIN check error:", error);
+                    errorText.innerText = "Error verifying PIN. Check connection.";
+                    errorText.classList.remove('hidden');
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    // Success: Save session and unlock
+                    sessionStorage.setItem('17apt_auth', 'true');
+                    document.getElementById('lock-screen').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                    updateNetworkStatus();
+                } else {
+                    errorText.innerText = "Sayop ang PIN. Palihug sulayi og usab.";
+                    errorText.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                errorText.innerText = "Connection error.";
+                errorText.classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('17apt_auth');
+            location.reload();
+        }
+
+        // Check if already authenticated in this session
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('17apt_auth') === 'true') {
+                document.getElementById('lock-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                updateNetworkStatus();
+            }
+        });
+
+        // --- NAVIGATION & TABS ---
+        function navigateTo(viewName) {
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-entry').classList.add('hidden');
+            document.getElementById('view-viewer').classList.add('hidden');
+
+            document.getElementById('view-' + viewName).classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            if (viewName === 'viewer') {
+                fetchAllData();
+            }
+        }
+
+        function switchFormTab(tabId) {
+            document.querySelectorAll('#view-entry .tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#view-entry .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('form-' + tabId).classList.add('active');
+            document.getElementById('form-tab-' + tabId).classList.add('active');
+        }
+
+        function switchViewerTab(tabId) {
+            document.querySelectorAll('#view-viewer .tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#view-viewer .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('viewer-' + tabId).classList.add('active');
+            document.getElementById('viewer-tab-' + tabId).classList.add('active');
+        }
+
+        // --- NETWORK & BATTERY MONITORING ---
         function updateNetworkStatus() {
             const statusBadge = document.getElementById('net-status');
             const statusDot = document.getElementById('net-dot');
@@ -94,44 +387,36 @@
             const warnDesc = document.getElementById('warn-desc');
 
             if (!navigator.onLine) {
-                // Completely Offline
                 statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 shadow-sm";
                 statusDot.className = "w-2 h-2 rounded-full bg-red-600";
                 statusText.innerText = "Offline (No Internet)";
-                
-                warningBanner.className = "w-full max-w-3xl mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm";
+                warningBanner.className = "w-full max-w-7xl mx-auto mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm";
                 warnTitle.innerText = "WALAY INTERNET CONNECTION (OFFLINE)";
-                warnDesc.innerText = "Dili ka maka-save o ka-load og data sa Online Record Book. Kinahanglan ka og koneksyon.";
+                warnDesc.innerText = "Dili ka maka-save o ka-load og data sa Record Book.";
                 warningBanner.classList.remove('hidden');
                 return;
             }
 
-            // Check connection quality if available (navigator.connection)
             const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            
             if (connection) {
-                const effectiveType = connection.effectiveType; // '4g', '3g', '2g', 'slow-2g'
-                const downlink = connection.downlink; // speed in Mbps roughly
+                const effectiveType = connection.effectiveType;
+                const downlink = connection.downlink;
 
                 if (effectiveType === 'slow-2g' || effectiveType === '2g' || (downlink && downlink < 0.5)) {
-                    // Very Weak / Slow Signal
                     statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 shadow-sm";
                     statusDot.className = "w-2 h-2 rounded-full bg-amber-600 animate-pulse";
                     statusText.innerText = "Weak Signal (" + effectiveType.toUpperCase() + ")";
-
-                    warningBanner.className = "w-full max-w-3xl mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm";
+                    warningBanner.className = "w-full max-w-7xl mx-auto mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm";
                     warnTitle.innerText = "HINAY KAAYO ANG SIGNAL (" + effectiveType.toUpperCase() + ")";
-                    warnDesc.innerText = "Delikado mag-submit og data karon kay posibleng maputol. Paghulat nga mo-kusog ang signal.";
+                    warnDesc.innerText = "Delikado mag-submit og data karon kay posibleng maputol.";
                     warningBanner.classList.remove('hidden');
                 } else {
-                    // Good / Strong Signal (4G / Fast)
                     statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm";
                     statusDot.className = "w-2 h-2 rounded-full bg-green-600 animate-pulse";
                     statusText.innerText = "Online (" + effectiveType.toUpperCase() + " - Lig-on)";
                     warningBanner.classList.add('hidden');
                 }
             } else {
-                // Standard online check if connection API is not fully exposed by browser
                 statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm";
                 statusDot.className = "w-2 h-2 rounded-full bg-green-600 animate-pulse";
                 statusText.innerText = "Online (Cloud Connected)";
@@ -141,12 +426,7 @@
 
         window.addEventListener('online', updateNetworkStatus);
         window.addEventListener('offline', updateNetworkStatus);
-        
-        if (navigator.connection) {
-            navigator.connection.addEventListener('change', updateNetworkStatus);
-        }
 
-        // Battery Monitor
         if ('getBattery' in navigator) {
             navigator.getBattery().then(battery => {
                 const batteryStatus = document.getElementById('battery-status');
@@ -165,9 +445,154 @@
             });
         }
 
-        window.onload = () => {
-            updateNetworkStatus();
-        };
+        // --- COMPUTATIONS & SUBMISSIONS ---
+        function fmt(num) {
+            if (num === null || num === undefined) return '0.00';
+            return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        document.querySelectorAll('.c_input').forEach(input => input.addEventListener('input', computeCoal));
+        function computeCoal() {
+            let weight = parseFloat(document.getElementById('c_weight').value) || 0;
+            let buy_pk = parseFloat(document.getElementById('c_buy_pk').value) || 0;
+            let sell_pk = parseFloat(document.getElementById('c_sell_pk').value) || 0;
+            let trk_pk = parseFloat(document.getElementById('c_trk_pk').value) || 0;
+            let doc_pk = parseFloat(document.getElementById('c_doc_pk').value) || 0;
+            let p1_pk = parseFloat(document.getElementById('c_p1_pk').value) || 0;
+            let p2_tot = parseFloat(document.getElementById('c_p2_tot').value) || 0;
+            let blr_tot = parseFloat(document.getElementById('c_blr_tot').value) || 0;
+
+            let buy_tot = weight * buy_pk;
+            let sell_tot = weight * sell_pk;
+            let exp_trk_tot = weight * trk_pk;
+            let exp_doc_tot = weight * doc_pk;
+            let exp_p1_tot = weight * p1_pk;
+            let exp_tot = exp_trk_tot + exp_doc_tot + exp_p1_tot + p2_tot + blr_tot;
+            let net = sell_tot - buy_tot - exp_tot;
+
+            document.getElementById('c_buy_tot').innerText = buy_tot.toLocaleString(undefined, {minimumFractionDigits:2});
+            document.getElementById('c_sell_tot').innerText = sell_tot.toLocaleString(undefined, {minimumFractionDigits:2});
+            document.getElementById('c_exp_tot').innerText = exp_tot.toLocaleString(undefined, {minimumFractionDigits:2});
+            document.getElementById('c_net').innerText = net.toLocaleString(undefined, {minimumFractionDigits:2});
+            
+            return {
+                date: document.getElementById('c_date').value,
+                weight: weight,
+                buy_per_kilo: buy_pk, buy_total: buy_tot,
+                sell_per_kilo: sell_pk, sell_total: sell_tot,
+                exp_trucking_per_kilo: trk_pk, exp_trucking_total: exp_trk_tot,
+                exp_documents_per_kilo: doc_pk, exp_documents_total: exp_doc_tot,
+                exp_purchaser1_per_kilo: p1_pk, exp_purchaser1_total: exp_p1_tot,
+                exp_purchaser2_total: p2_tot, exp_boiler_total: blr_tot,
+                expenses_total: exp_tot, net: net
+            };
+        }
+
+        document.querySelectorAll('.cr_input').forEach(input => input.addEventListener('input', computeCorn));
+        function computeCorn() {
+            let weight = parseFloat(document.getElementById('cr_weight').value) || 0;
+            let buy_pk = parseFloat(document.getElementById('cr_buy_pk').value) || 0;
+            let sell_pk = parseFloat(document.getElementById('cr_sell_pk').value) || 0;
+            let trk_pk = parseFloat(document.getElementById('cr_trk_pk').value) || 0;
+            let doc_pk = parseFloat(document.getElementById('cr_doc_pk').value) || 0;
+            let p1_pk = parseFloat(document.getElementById('cr_p1_pk').value) || 0;
+            let p2_pk = parseFloat(document.getElementById('cr_p2_pk').value) || 0;
+            let sev_pk = parseFloat(document.getElementById('cr_sev_pk').value) || 0;
+
+            let buy_tot = weight * buy_pk;
+            let sell_tot = weight * sell_pk;
+            let exp_trk_tot = weight * trk_pk;
+            let exp_doc_tot = weight * doc_pk;
+            let exp_p1_tot = weight * p1_pk;
+            let exp_p2_tot = weight * p2_pk;
+            let exp_sev_tot = weight * sev_pk;
+            let exp_tot = exp_trk_tot + exp_doc_tot + exp_p1_tot + exp_p2_tot + exp_sev_tot;
+            let net = sell_tot - buy_tot - exp_tot;
+
+            document.getElementById('cr_buy_tot').innerText = buy_tot.toLocaleString(undefined, {minimumFractionDigits:2});
+            document.getElementById('cr_sell_tot').innerText = sell_tot.toLocaleString(undefined, {minimumFractionDigits:2});
+            document.getElementById('cr_exp_tot').innerText = exp_tot.toLocaleString(undefined, {minimumFractionDigits:2});
+            document.getElementById('cr_net').innerText = net.toLocaleString(undefined, {minimumFractionDigits:2});
+            
+            return {
+                date: document.getElementById('cr_date').value,
+                weight: weight,
+                buy_per_kilo: buy_pk, buy_total: buy_tot,
+                sell_per_kilo: sell_pk, sell_total: sell_tot,
+                exp_trucking_per_kilo: trk_pk, exp_trucking_total: exp_trk_tot,
+                exp_documents_per_kilo: doc_pk, exp_documents_total: exp_doc_tot,
+                exp_purchaser1_per_kilo: p1_pk, exp_purchaser1_total: exp_p1_tot,
+                exp_purchaser2_per_kilo: p2_pk, exp_purchaser2_total: exp_p2_tot,
+                exp_seventeen_per_kilo: sev_pk, exp_seventeen_total: exp_sev_tot,
+                expenses_total: exp_tot, net: net
+            };
+        }
+
+        async function submitCoal(event) {
+            event.preventDefault();
+            const data = computeCoal();
+            const { error } = await supabaseClient.from('coal').insert([data]);
+            if (error) {
+                alert("Error saving data: " + error.message);
+            } else {
+                alert("COAL data successfully saved!");
+                event.target.reset();
+                computeCoal();
+            }
+        }
+
+        async function submitCorn(event) {
+            event.preventDefault();
+            const data = computeCorn();
+            const { error } = await supabaseClient.from('corn').insert([data]);
+            if (error) {
+                alert("Error saving data: " + error.message);
+            } else {
+                alert("CORN data successfully saved!");
+                event.target.reset();
+                computeCorn();
+            }
+        }
+
+        // --- VIEWER FETCHING ---
+        async function fetchAllData() {
+            await Promise.all([fetchSummary(), fetchCoal(), fetchCorn()]);
+        }
+
+        async function fetchSummary() {
+            const { data } = await supabaseClient.from('sales_summary').select('*').limit(1);
+            if (data && data.length > 0) {
+                document.getElementById('sum-coal').innerText = '₱ ' + fmt(data[0].total_coal_net);
+                document.getElementById('sum-corn').innerText = '₱ ' + fmt(data[0].total_corn_net);
+                document.getElementById('sum-grand').innerText = '₱ ' + fmt(data[0].grand_total_net);
+            }
+        }
+
+        async function fetchCoal() {
+            const { data } = await supabaseClient.from('coal').select('*').order('date', { ascending: false });
+            const tbody = document.getElementById('coal-body');
+            if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">No records found.</td></tr>'; return; }
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                let tr = document.createElement('tr');
+                let netClass = row.net >= 0 ? 'net-positive' : 'net-negative';
+                tr.innerHTML = `<td class="date-col">${row.date}</td><td class="num">${fmt(row.weight)}</td><td class="num">${fmt(row.buy_per_kilo)}</td><td class="num">${fmt(row.buy_total)}</td><td class="num">${fmt(row.sell_per_kilo)}</td><td class="num">${fmt(row.sell_total)}</td><td class="num">${fmt(row.expenses_total)}</td><td class="num ${netClass}">${fmt(row.net)}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchCorn() {
+            const { data } = await supabaseClient.from('corn').select('*').order('date', { ascending: false });
+            const tbody = document.getElementById('corn-body');
+            if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">No records found.</td></tr>'; return; }
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                let tr = document.createElement('tr');
+                let netClass = row.net >= 0 ? 'net-positive' : 'net-negative';
+                tr.innerHTML = `<td class="date-col">${row.date}</td><td class="num">${fmt(row.weight)}</td><td class="num">${fmt(row.buy_per_kilo)}</td><td class="num">${fmt(row.buy_total)}</td><td class="num">${fmt(row.sell_per_kilo)}</td><td class="num">${fmt(row.sell_total)}</td><td class="num">${fmt(row.expenses_total)}</td><td class="num ${netClass}">${fmt(row.net)}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
     </script>
 </body>
 </html>
