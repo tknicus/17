@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seventeens Agricultural Products Trading - Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom hover animation for the menu cards */
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-color: #16a34a; /* green-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6 font-sans">
+    
+    <!-- Main Container -->
+    <div class="max-w-3xl w-full text-center">
+        
+        <!-- Logo and Header -->
+        <div class="mb-10 flex flex-col items-center">
+            <img src="17.png" alt="Seventeens Agricultural Products Trading Logo" class="w-56 h-56 object-contain mb-6 drop-shadow-lg">
+            <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight mb-2">Seventeens</h1>
+            <h2 class="text-xl font-semibold text-gray-600 uppercase tracking-widest">Agricultural Products Trading</h2>
+            <p class="text-sm text-gray-500 mt-2">Sales & Inventory Management System</p>
+        </div>
+
+        <!-- Menu Options -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            
+            <!-- Entry Link -->
+            <a href="entry.html" class="menu-card bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent transition-all duration-300 flex flex-col items-center group text-decoration-none">
+                <div class="bg-blue-100 text-blue-600 p-4 rounded-full mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Data Entry</h3>
+                <p class="text-gray-500 text-sm">Add new Coal and Corn sales records to the database.</p>
+            </a>
+
+            <!-- View Link -->
+            <a href="view.html" class="menu-card bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent transition-all duration-300 flex flex-col items-center group text-decoration-none">
+                <div class="bg-green-100 text-green-600 p-4 rounded-full mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Data Viewer</h3>
+                <p class="text-gray-500 text-sm">View summary and Excel-like reports of all transactions.</p>
+            </a>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-16 text-gray-400 text-sm">
+            &copy; 2026 Seventeens Agricultural Products Trading. All rights reserved.
+        </div>
+    </div>
+
+</body>
+</html>
