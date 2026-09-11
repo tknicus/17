@@ -15,27 +15,29 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-between p-6 font-sans">
     
-    <!-- Top Status Bar (Network & Battery) -->
-    <div class="w-full max-w-3xl flex justify-end items-center gap-3 text-xs font-semibold mb-2">
-        <div id="net-status" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm">
+    <!-- Top Status Bar (Network Strength & Battery) -->
+    <div class="w-full max-w-3xl flex flex-wrap justify-end items-center gap-2 text-xs font-semibold mb-2">
+        <!-- Signal / Network Strength Badge -->
+        <div id="net-status" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm transition-all">
             <span id="net-dot" class="w-2 h-2 rounded-full bg-green-600 animate-pulse"></span>
-            <span id="net-text">Online (Cloud Connected)</span>
+            <span id="net-text">Checking Signal...</span>
         </div>
+        <!-- Battery Status Badge -->
         <div id="battery-status" class="hidden items-center gap-1.5 px-3 py-1 rounded-full bg-white text-gray-700 shadow-sm border border-gray-200">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
             <span id="battery-text">Battery: --%</span>
         </div>
     </div>
 
-    <!-- OFFLINE WARNING BANNER -->
-    <div id="offline-banner" class="hidden w-full max-w-3xl mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
+    <!-- WARNING BANNER FOR OFFLINE OR WEAK SIGNAL -->
+    <div id="warning-banner" class="hidden w-full max-w-3xl mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm">
         <div class="flex items-center">
-            <div class="flex-shrink-0 text-red-500">
+            <div class="flex-shrink-0 text-amber-500" id="warn-icon">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             </div>
             <div class="ml-3">
-                <p class="text-sm font-bold text-red-800">WALAY INTERNET CONNECTION (OFFLINE)</p>
-                <p class="text-xs text-red-700">Gikinahanglan ang internet aron maka-access sa Supabase database para sa Data Entry ug Viewer.</p>
+                <p class="text-sm font-bold text-amber-900" id="warn-title">HINAY ANG INTERNET</p>
+                <p class="text-xs text-amber-700" id="warn-desc">Siguraduha nga lig-on ang signal usa ka mag-save sa data aron dili ma-interrupt.</p>
             </div>
         </div>
     </div>
@@ -82,28 +84,67 @@
     </div>
 
     <script>
-        // --- NETWORK & BATTERY MONITORING ---
+        // --- ADVANCED NETWORK & STRENGTH MONITORING ---
         function updateNetworkStatus() {
             const statusBadge = document.getElementById('net-status');
             const statusDot = document.getElementById('net-dot');
             const statusText = document.getElementById('net-text');
-            const offlineBanner = document.getElementById('offline-banner');
+            const warningBanner = document.getElementById('warning-banner');
+            const warnTitle = document.getElementById('warn-title');
+            const warnDesc = document.getElementById('warn-desc');
 
-            if (navigator.onLine) {
-                statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm";
-                statusDot.className = "w-2 h-2 rounded-full bg-green-600 animate-pulse";
-                statusText.innerText = "Online (Cloud Connected)";
-                offlineBanner.classList.add('hidden');
-            } else {
+            if (!navigator.onLine) {
+                // Completely Offline
                 statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 shadow-sm";
                 statusDot.className = "w-2 h-2 rounded-full bg-red-600";
                 statusText.innerText = "Offline (No Internet)";
-                offlineBanner.classList.remove('hidden');
+                
+                warningBanner.className = "w-full max-w-3xl mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm";
+                warnTitle.innerText = "WALAY INTERNET CONNECTION (OFFLINE)";
+                warnDesc.innerText = "Dili ka maka-save o ka-load og data sa Supabase. Kinahanglan ka og koneksyon.";
+                warningBanner.classList.remove('hidden');
+                return;
+            }
+
+            // Check connection quality if available (navigator.connection)
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            
+            if (connection) {
+                const effectiveType = connection.effectiveType; // '4g', '3g', '2g', 'slow-2g'
+                const downlink = connection.downlink; // speed in Mbps roughly
+
+                if (effectiveType === 'slow-2g' || effectiveType === '2g' || (downlink && downlink < 0.5)) {
+                    // Very Weak / Slow Signal
+                    statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 shadow-sm";
+                    statusDot.className = "w-2 h-2 rounded-full bg-amber-600 animate-pulse";
+                    statusText.innerText = "Weak Signal (" + effectiveType.toUpperCase() + ")";
+
+                    warningBanner.className = "w-full max-w-3xl mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg shadow-sm";
+                    warnTitle.innerText = "HINAY KAAYO ANG SIGNAL (" + effectiveType.toUpperCase() + ")";
+                    warnDesc.innerText = "Delikado mag-submit og data karon kay posibleng maputol. Paghulat nga mo-kusog ang signal.";
+                    warningBanner.classList.remove('hidden');
+                } else {
+                    // Good / Strong Signal (4G / Fast)
+                    statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm";
+                    statusDot.className = "w-2 h-2 rounded-full bg-green-600 animate-pulse";
+                    statusText.innerText = "Online (" + effectiveType.toUpperCase() + " - Lig-on)";
+                    warningBanner.classList.add('hidden');
+                }
+            } else {
+                // Standard online check if connection API is not fully exposed by browser
+                statusBadge.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 shadow-sm";
+                statusDot.className = "w-2 h-2 rounded-full bg-green-600 animate-pulse";
+                statusText.innerText = "Online (Cloud Connected)";
+                warningBanner.classList.add('hidden');
             }
         }
 
         window.addEventListener('online', updateNetworkStatus);
         window.addEventListener('offline', updateNetworkStatus);
+        
+        if (navigator.connection) {
+            navigator.connection.addEventListener('change', updateNetworkStatus);
+        }
 
         // Battery Monitor
         if ('getBattery' in navigator) {
