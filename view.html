@@ -24,46 +24,50 @@
         .net-negative { color: #dc2626; font-weight: bold; }
     </style>
 </head>
-<body class="bg-gray-100 p-6 font-sans">
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
+<body class="bg-gray-100 p-4 md:p-6 font-sans">
+    <div class="max-w-7xl mx-auto bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
         
         <!-- BACK TO MAIN MENU BUTTON -->
-        <a href="index.html" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 mb-6 transition-colors">
+        <a href="index.html" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 mb-4 transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Back to Main Menu
         </a>
 
-        <h1 class="text-2xl font-bold mb-2 text-gray-800">Sales Records - Viewer</h1>
-        <p class="text-sm text-gray-500 mb-6">Live data fetched directly from Supabase</p>
+        <h1 class="text-xl md:text-2xl font-bold mb-1 text-gray-800">Sales Records - Viewer</h1>
+        <p class="text-xs md:text-sm text-gray-500 mb-4">Live data fetched directly from Supabase</p>
         
-        <!-- Tabs -->
-        <div class="flex border-b border-gray-300 mb-4">
-            <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn active px-6 py-2 text-gray-600 focus:outline-none transition-colors">Summary</button>
-            <button onclick="switchTab('coal')" id="tab-coal" class="tab-btn px-6 py-2 text-gray-600 focus:outline-none transition-colors">Coal Data</button>
-            <button onclick="switchTab('corn')" id="tab-corn" class="tab-btn px-6 py-2 text-gray-600 focus:outline-none transition-colors">Corn Data</button>
+        <!-- Tabs & Refresh Button Container -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-300 mb-6 gap-4">
+            <!-- Tabs -->
+            <div class="flex overflow-x-auto space-x-2">
+                <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn active px-4 md:px-6 py-2 text-gray-600 focus:outline-none transition-colors whitespace-nowrap">Summary</button>
+                <button onclick="switchTab('coal')" id="tab-coal" class="tab-btn px-4 md:px-6 py-2 text-gray-600 focus:outline-none transition-colors whitespace-nowrap">Coal Data</button>
+                <button onclick="switchTab('corn')" id="tab-corn" class="tab-btn px-4 md:px-6 py-2 text-gray-600 focus:outline-none transition-colors whitespace-nowrap">Corn Data</button>
+            </div>
             
-            <div class="ml-auto flex items-center">
-                <button onclick="fetchAllData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm font-semibold flex items-center gap-2">
+            <!-- Refresh Button -->
+            <div>
+                <button onclick="fetchAllData()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     Refresh Data
                 </button>
             </div>
         </div>
 
-        <!-- SUMMARY VIEW -->
-        <div id="summary" class="tab-content active overflow-x-auto">
-            <div class="grid grid-cols-3 gap-6 mb-6">
-                <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg text-center">
-                    <h3 class="text-blue-800 font-semibold mb-2">Total COAL Net</h3>
-                    <p class="text-3xl font-bold text-blue-900" id="sum-coal">₱ 0.00</p>
+        <!-- SUMMARY VIEW (Responsive Stack on Mobile, 3 Columns on Desktop) -->
+        <div id="summary" class="tab-content active">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
+                <div class="bg-blue-50 border border-blue-200 p-5 rounded-lg text-center shadow-sm">
+                    <h3 class="text-blue-800 font-semibold mb-1 text-sm md:text-base">Total COAL Net</h3>
+                    <p class="text-2xl md:text-3xl font-bold text-blue-900 break-words" id="sum-coal">₱ 0.00</p>
                 </div>
-                <div class="bg-yellow-50 border border-yellow-200 p-6 rounded-lg text-center">
-                    <h3 class="text-yellow-800 font-semibold mb-2">Total CORN Net</h3>
-                    <p class="text-3xl font-bold text-yellow-900" id="sum-corn">₱ 0.00</p>
+                <div class="bg-yellow-50 border border-yellow-200 p-5 rounded-lg text-center shadow-sm">
+                    <h3 class="text-yellow-800 font-semibold mb-1 text-sm md:text-base">Total CORN Net</h3>
+                    <p class="text-2xl md:text-3xl font-bold text-yellow-900 break-words" id="sum-corn">₱ 0.00</p>
                 </div>
-                <div class="bg-green-50 border border-green-200 p-6 rounded-lg text-center shadow-inner">
-                    <h3 class="text-green-800 font-bold mb-2">GRAND TOTAL NET</h3>
-                    <p class="text-4xl font-black text-green-700" id="sum-grand">₱ 0.00</p>
+                <div class="bg-green-50 border border-green-200 p-5 rounded-lg text-center shadow-inner">
+                    <h3 class="text-green-800 font-bold mb-1 text-sm md:text-base">GRAND TOTAL NET</h3>
+                    <p class="text-3xl md:text-4xl font-black text-green-700 break-words" id="sum-grand">₱ 0.00</p>
                 </div>
             </div>
         </div>
@@ -125,13 +129,11 @@
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Utility to format numbers like Excel (comma separated, 2 decimals)
         function fmt(num) {
             if (num === null || num === undefined) return '0.00';
             return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        // Tab Switcher
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -139,7 +141,6 @@
             document.getElementById('tab-' + tabId).classList.add('active');
         }
 
-        // Fetch Data from Supabase
         async function fetchAllData() {
             document.getElementById('coal-body').innerHTML = '<tr><td colspan="8" class="text-center text-gray-500 py-4">Loading...</td></tr>';
             document.getElementById('corn-body').innerHTML = '<tr><td colspan="8" class="text-center text-gray-500 py-4">Loading...</td></tr>';
@@ -165,7 +166,6 @@
         }
 
         async function fetchCoal() {
-            // Order by date descending (newest first)
             const { data, error } = await supabaseClient.from('coal').select('*').order('date', { ascending: false });
             const tbody = document.getElementById('coal-body');
             
@@ -179,7 +179,7 @@
                 return;
             }
 
-            tbody.innerHTML = ''; // Clear loading
+            tbody.innerHTML = '';
             data.forEach(row => {
                 let tr = document.createElement('tr');
                 let netClass = row.net >= 0 ? 'net-positive' : 'net-negative';
@@ -229,9 +229,7 @@
             });
         }
 
-        // Fetch data initially on page load
         window.onload = () => {
-            // Only fetch if keys are updated
             if (SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL') {
                 fetchAllData();
             } else {
