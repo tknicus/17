@@ -605,6 +605,35 @@
                 tbody.appendChild(tr);
             });
         }
+
+
+        // Annual Maintenance Checker
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentDate = new Date();
+            const expiryYear = 2026;
+
+            // Kung ang tuig lapas na sa 2026 (pasabot 2027 na pataas)
+            if (currentDate.getFullYear() > expiryYear) {
+                const lockScreen = document.getElementById('lock-screen');
+                
+                // Ilisan nato ang sulod sa lock screen sa usa ka Maintenance Message
+                lockScreen.innerHTML = `
+                    <div class="bg-white max-w-md w-full p-8 rounded-2xl shadow-2xl text-center mt-20">
+                        <img src="17.png" alt="Logo" class="w-24 h-24 mx-auto object-contain mb-4 grayscale">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">System Update Required</h2>
+                        <div class="w-12 h-1 bg-yellow-500 mx-auto mb-4 rounded-full"></div>
+                        <p class="text-sm text-gray-600 mb-6 leading-relaxed">
+                            Ang Seventeens Trading System naka-schedule para sa iyang <strong>Annual Maintenance ug Security Update</strong> para sa tuig 2027. 
+                            <br><br>
+                            Palihug kontaka ang inyong System Developer aron ma-activate pag-usab ang inyong access ug masiguro ang kaluwasan sa inyong data.
+                        </p>
+                        <a href="tel:09912045110" class="w-full inline-block bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 rounded-xl transition-colors shadow-md">
+                            Kontaka ang Developer
+                        </a>
+                    </div>
+                `;
+            }
+        });
     </script>
 </body>
 </html>
