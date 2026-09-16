@@ -310,15 +310,15 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_xO3twPzyDBLhdltnkwoS3w_xswYLyf_';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        //async function sha256Hash(str) {
-        //    try {
-        //        const encoder = new TextEncoder();
-        //        const data = encoder.encode(str);
-        //        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        //        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        //        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        //    } catch (err) { return ""; }
-        //}
+        async function sha256Hash(str) {
+            try {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(str);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (err) { return ""; }
+        }
 
         // --- PIN VERIFICATION SYSTEM ---
         async function verifyPin(event) {
