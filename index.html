@@ -327,14 +327,18 @@
             const errorText = document.getElementById('pin-error');
 
             try {
-                // 1. I-hash una ang gi-input nga PIN gamit ang SHA-256
+                // I-hash ang input
                 const hashedInputPin = await sha256Hash(inputPin);
+                console.log("Input PIN:", inputPin);
+                console.log("Generated Hash:", hashedInputPin); // <--- Tan-awa kini sa F12 Console
 
-                // 2. Query allowed_pins table gikan sa Supabase gamit ang hash nga value
+                // Query allowed_pins table
                 const { data, error } = await supabaseClient
                     .from('allowed_pins')
                     .select('pin_code')
                     .eq('pin_code', hashedInputPin);
+
+                console.log("Supabase Result:", data); // <--- Tan-awa kung nakit-an ba
 
                 if (error) {
                     console.error("PIN check error:", error);
@@ -344,7 +348,6 @@
                 }
 
                 if (data && data.length > 0) {
-                    // Success: Save session and unlock
                     sessionStorage.setItem('17apt_auth', 'true');
                     document.getElementById('lock-screen').classList.add('hidden');
                     document.getElementById('main-app').classList.remove('hidden');
